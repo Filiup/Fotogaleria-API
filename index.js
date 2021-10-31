@@ -1,5 +1,11 @@
 require('dotenv').config();
 const express = require('express');
+const { existsSync, mkdirSync } = require('fs');
+
+// Pokiaľ neexistuje priečinok pre fotky galerii, tak ho vytvorime
+if (!existsSync(process.env.IMAGE_FOLDER)) {
+    mkdirSync(process.env.IMAGE_FOLDER, { recursive: true });
+}
 
 const app = express();
 
