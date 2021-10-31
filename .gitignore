@@ -148,7 +148,6 @@ dist
 
 # Test
 /test
-resources.txt
 
 # Gallery images
 /images/galleries/*
