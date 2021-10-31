@@ -1,4 +1,11 @@
 https://www.npmjs.com/package/multer#error-handling
 https://github.com/ianare/exif-samples
 
+Github: 
+https://github.com/yablko/gitujeme-o-100-sest
+
+Markdown syntax:
+https://www.markdownguide.org/basic-syntax
+https://daringfireball.net/projects/markdown/syntax
+
 
