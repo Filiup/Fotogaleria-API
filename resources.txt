@@ -4,6 +4,9 @@ https://github.com/ianare/exif-samples
 Github: 
 https://github.com/yablko/gitujeme-o-100-sest
 
+Personal access token:
+https://stackoverflow.com/questions/68775869/support-for-password-authentication-was-removed-please-use-a-personal-access-to
+
 Markdown syntax:
 https://www.markdownguide.org/basic-syntax
 https://daringfireball.net/projects/markdown/syntax
