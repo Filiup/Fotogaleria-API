@@ -190,6 +190,10 @@ router.delete("/:gallery/:id", async (req, res) => {
 
 });
 
+// Pokiaľ uźivateľ nezadná meno galérie, pošleme mu http status status 404 (Not found) 
+// Upozorníme ho, aby tak učinil
+
+router.all("/", (req, res) => res.status(404).send("You must enter a gallery name."));
 
 
 module.exports = router;

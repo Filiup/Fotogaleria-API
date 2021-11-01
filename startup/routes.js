@@ -17,8 +17,9 @@ module.exports = app => {
         winston.info("Morgan enabled ...");
       }
       
-    app.use("/api/galleries", galeries);
     app.use("/api/galleries/images", images);
+    app.use("/api/galleries", galeries);
+    
     app.use(error);
 
 }
