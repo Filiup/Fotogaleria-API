@@ -199,34 +199,3 @@ router.all("/", (req, res) => res.status(404).send("You must enter a gallery nam
 module.exports = router;
 
 
-// TODO
-// Skús zmazat ten debilný waring ktorý ti stále háže Node pri zapnutí aplikácie DONE
-
-// Obrázok multer zapíše do priečinka, aj keď sme navratili 404ku (Pozri post handler), skús to opraviť DONE
-// Napíš get a get:id  handler pre obrázky  DONE !!!!
-// Napís Delete handler pre obrázky, môžu sa mazať pomocou ID DONE !!!
-// Riadok 41 (tam kde je split metóda) uprav tak, aby si použil "extname" metódu knižnice path ZATIAĽ NEPOTREBNÉ
-// Oprav fullpath parameter pri /images endpointe, zmeň v post requeste do co ukladas DONE
-
-// Všade, kde ako parameter posielaš id, tak pomocou "mongoose.Types.ObjectId.isValid" over, či je v správnom tvare DONE
-// Napíš kód pre GET "/:gallery/:image" tak, aby sa pomocou query string dalo nastavovať rozlisenie obrazka DONE
-// Nastav limit veľkosti pre obrázky DONE
-// Do image.js môžeš pridať a následne aj ukladať URL NEPOTREBNÉ
-
-// Oprav blbosti ako napr put a delete request v /api/galleries DONE 
-
-// Uprav GET request pre obrázok tak, aby namiesto mena obrázka stačilo ID, query parameter image=false namiesto obrázka zobrazí jeho údaje  DONE
-
-// Urob funkciu, ktorej úlohou bude kontrolovať, či si do galérie pridal fotku, pokiaľ áno tak nech zoberie prvú a nastavý ju ako DONE
-// náhľadový obrázok v kolekcii galleries DONE
-
-// Urob get/:id handler v galleries.js pre zobrazovanie náhľadových obrázkov DONE
-// Urob funkciu, ktorej úlohou bude kontrolovať či si nezmazal náhľadový obrázok, pokiaľ áno, tak nech v kolekcii galleries nastaví image na Null DONE
-// V index.js pouvažuj nad zmenením routra z /api/images na /api/galleries/images DONE
-
-// V súbore image_functions.js ošetri "throw err"; DONE
-// použi nejaký error logger (winston.js) DONE
-// Urob menší refactoring  
-// EXIF !!!!! DONE
-
-// Dôkladne otestuj celé API a na základe toho oprav bugy
