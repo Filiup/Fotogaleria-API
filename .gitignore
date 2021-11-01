@@ -151,3 +151,6 @@ dist
 
 # Gallery images
 /images/galleries/*
+
+# To do list
+TODO.txt
