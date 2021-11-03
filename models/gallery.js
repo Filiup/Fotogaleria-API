@@ -49,7 +49,7 @@ const Gallery = mongoose.model("Gallery", new mongoose.Schema({
     },
 
     images: {
-        type: new mongoose.Schema({ ... imageschema, ... {
+        type: new mongoose.Schema({ ... imageSchema, ... {
             exif: {
                 type: Object,
                 default: null
