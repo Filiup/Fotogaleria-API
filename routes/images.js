@@ -22,14 +22,11 @@ const exif = require('../others/exif');
 
 router.get("/:gallery", async (req, res) => {
     // Najprv pozrieme, že či daná galéria existuje, pokiaľ nie navrátime 400 Bad Request
-    const galleryNames = await Gallery.find({ name: req.params.gallery });
-    if (!galleryNames.length) return res.status(404).send("Daná galéria neexistuje.");
+    const images = await Gallery.find({name: req.params.gallery}).select("images -_id").lean();
+    if (!images.length) return res.status(404).send("Daná galéria neexistuje.");
 
-    // Pokiaľ áno, inicializujeme jej model kolekcie a navrátime jeho obsah
-    const Image = mongoose.models[req.params.gallery] || imageModel(req.params.gallery);
-    const images = await Image.find().sort("name").lean();
 
-    res.send(images);
+    res.send(images[0].images);
 
     
 });
@@ -142,15 +139,6 @@ router.post("/:gallery" ,async (req, res) => {
         // Zmenenie náhľadového obrázka pre danú galériu
         // updatePreviewImage(galleryNames[0], Image);
 
-        /*
-                "images.path": req.file.originalname,
-                "images.fullpath": `${req.params.gallery}/${req.file.originalname}`,
-                "images.name": req.file.originalname.split(".")[0],
-
-                // Pokiaľ obrázok obsahuje exif dáta, tak sa uložia do DB, pokiaľ nie tak sa uloží: exif: null
-                "images.exif": exifData != undefined ? exifData : null     
-        */
-     
         res.send(image);  
 
     });
