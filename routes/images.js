@@ -113,12 +113,8 @@ router.post("/:gallery" ,async (req, res) => {
             return res.status(404).send("Daná galéria neexistuje.");
         }
 
-        // Najprv skontrolujeme že či je daný model kolekcie už inicializovaný, pokiaľ nie tak ho inicializujeme
-        // Pokiaľ kolekcia neexistuje tak sa sama vytvorí 
-        const Image = mongoose.models[gallery] || imageModel(gallery);
-
         // Pokiaľ sa obrázok v kolekcii už nachádza, navrátime 400 Bad Request
-        const imagePaths = await Image.find({path: req.file.originalname });
+        const imagePaths = await Gallery.find({"images.path": req.file.originalname });
         if (imagePaths.length) return res.status(400).send("Obrázok s týmto menom sa už v galérii nachádza.");
 
         // Exif data obrázka
@@ -126,23 +122,25 @@ router.post("/:gallery" ,async (req, res) => {
 
         // Do kolekcie pridáme nový dokument obsahujúci údaje ohľadom obrázka
 
-        const image = new Image({
-            path: req.file.originalname,
-            fullpath: `${req.params.gallery}/${req.file.originalname}`,
-            name: req.file.originalname.split(".")[0],
 
-            // Pokiaľ obrázok obsahuje exif dáta, tak sa uložia do DB, pokiaľ nie tak sa uloží: exif: null
-            exif: exifData != undefined ? exifData : null 
-     
-        });
+        const image = await Gallery.updateOne({ name: gallery }, {
+            $push: {
+                "images.path": req.file.originalname,
+                "images.fullpath": `${req.params.gallery}/${req.file.originalname}`,
+                "images.name": req.file.originalname.split(".")[0],
+
+                // Pokiaľ obrázok obsahuje exif dáta, tak sa uložia do DB, pokiaľ nie tak sa uloží: exif: null
+                "images.exif": exifData != undefined ? exifData : null 
+
+            }
+        }, {new: true });
         
-        await image.save();
 
 
         // Zmenenie náhľadového obrázka pre danú galériu
-        updatePreviewImage(galleryNames[0], Image);
+        // updatePreviewImage(galleryNames[0], Image);
      
-        res.send(image.toObject());  
+        res.send(image);  
 
     });
   
