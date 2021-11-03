@@ -55,7 +55,8 @@ const Gallery = mongoose.model("Gallery", new mongoose.Schema({
                 default: null
             }
             
-        } })
+        } }),
+        default: null
     }
 
 

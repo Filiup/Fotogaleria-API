@@ -94,12 +94,7 @@ router.put("/:id", async (req, res) => {
         name: req.body.name
     };
 
-    const gallery = await Gallery.findByIdAndUpdate(req.params.id, params, { new: true });
-
-    mongoose.connection.db.collection(galleryData.name).rename(req.body.name)
-        .then(() => winston.info(`Collection "${galleryData.name}" was sucessfully renamed to "${req.body.name}"`))
-        .catch(err => winston.error(`Collection was not renamed: ${err.message}`, err)) 
-
+    const gallery = await Gallery.findByIdAndUpdate(req.params.id, params, { new: true }).select("-images");
     res.send(gallery);
 
 
@@ -122,20 +117,13 @@ router.delete("/:id", async (req, res) => {
     const Image = mongoose.models[galleryData.name] || imageModel(galleryData.name);
 
     // Všetok obsah kolekcie obrázkov danej galérie 
-    const images = await Image.find().lean();
+    const images = await Gallery.images.find().lean();
 
     // Zmažeme všetky obrázky, ktoré patria danej galérii
     images.forEach(image => {
         removeImage(`${process.env.IMAGE_FOLDER}${image.path}`, image.path);
     });
             
-
-    // Zmažeme kolekciu obrázkov danej gálerie
-    Image.collection.drop()
-        .then(() => winston.info(`Collection with the name of "${galleryData.name}" was sucessfully dropped.`))
-        .catch((err) => winston.error(`Colllection was not dropped: ${err.message}`, err)); 
-
-
     res.send(gallery);
 
 });
