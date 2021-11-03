@@ -123,22 +123,33 @@ router.post("/:gallery" ,async (req, res) => {
         // Do kolekcie pridáme nový dokument obsahujúci údaje ohľadom obrázka
 
 
-        const image = await Gallery.updateOne({ name: gallery }, {
+        const image = await Gallery.findOneAndUpdate(
+            { name: gallery }, {
             $push: {
+                images: {
+                    path: req.file.originalname,
+                    fullpath: `${req.params.gallery}/${req.file.originalname}`,
+                    name: req.file.originalname.split(".")[0],
+
+                    // Pokiaľ obrázok obsahuje exif dáta, tak sa uložia do DB, pokiaľ nie tak sa uloží: exif: null
+                    exif: exifData != undefined ? exifData : null   
+                }  
+            }
+        }, { safe: true, upsert: true, new: true });
+
+
+
+        // Zmenenie náhľadového obrázka pre danú galériu
+        // updatePreviewImage(galleryNames[0], Image);
+
+        /*
                 "images.path": req.file.originalname,
                 "images.fullpath": `${req.params.gallery}/${req.file.originalname}`,
                 "images.name": req.file.originalname.split(".")[0],
 
                 // Pokiaľ obrázok obsahuje exif dáta, tak sa uložia do DB, pokiaľ nie tak sa uloží: exif: null
-                "images.exif": exifData != undefined ? exifData : null 
-
-            }
-        }, {new: true });
-        
-
-
-        // Zmenenie náhľadového obrázka pre danú galériu
-        // updatePreviewImage(galleryNames[0], Image);
+                "images.exif": exifData != undefined ? exifData : null     
+        */
      
         res.send(image);  
 
