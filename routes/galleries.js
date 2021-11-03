@@ -2,7 +2,6 @@ const express = require('express');
 const { Gallery, validate } = require('../models/gallery');
 const mongoose = require('mongoose');
 
-const { imageModel, validateSize } = require('../models/image');
 const { removeImage, resizeImage } = require('../others/image_functions');
 const { resolve } = require('path');
 
@@ -11,7 +10,7 @@ const winston = require("winston");
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-    const galleries = await Gallery.find().sort("name").lean();
+    const galleries = await Gallery.find().sort("name").select("-images").lean();
     res.send(galleries);
 
 });
@@ -20,7 +19,7 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send("Id ktoré si zadal je v nesprávnom tvare.");
 
-    const gallery = await Gallery.findById(req.params.id);
+    const gallery = await Gallery.findById(req.params.id).select("-images");
     if (!gallery) return res.status(404).send("Gallery with the given id was not found");
 
     // Pokiaľ gallery.image == null, tak sa ako náhľadový obrázok nastaví default.jpg

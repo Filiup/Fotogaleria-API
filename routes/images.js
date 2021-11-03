@@ -14,7 +14,6 @@ const { resolve } = require('path');
 
 // Vlastné moduly
 const { Gallery } = require('../models/gallery');
-const { imageModel, validateSize } = require('../models/image');
 const { resizeImage, removeImage } = require('../others/image_functions');
 const { updatePreviewImage, resetPreviewImage } = require('../others/previewImage');
 const exif = require('../others/exif');
