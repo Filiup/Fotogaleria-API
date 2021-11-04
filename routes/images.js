@@ -38,23 +38,21 @@ router.get("/:gallery/:id", async (req, res) => {
 
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send("Id ktoré si zadal je v nesprávnom tvare.");
 
-    // Najprv pozrieme, že či daná galéria existuje, pokiaľ nie navrátime 400 Bad Request
-    const galleryNames = await Gallery.find({ name: req.params.gallery });
-    if (!galleryNames.length) return res.status(404).send("Daná galéria neexistuje.");
+    // Hľadáme galériu podľa mena, ktoré uživateľ zadal
+    const gallery = await Gallery.findOne({ name: req.params.gallery }).select("images -_id").lean();
 
-    // Pokiaľ galéria existuje, tak skontolujeme, že či sa v nej nachádza daná fotka, ktorú si chce uživateľ zobraziť
-    // Modely kolekcie pri obrázky sa vytvárajú dynamicky pomocou funkcie imageModel()
+    // Pokiaľ taká galéria neexistuje, navrátime status 404 Not Found
+    if (!gallery) return res.status(404).send("Daná galéria neexistuje.");
 
-    // Najprv skontrolujeme že či je daný model kolekcie už inicializovaný, pokiaľ nie tak ho inicializujeme
-    // Pokiaľ kolekcia neexistuje tak sa sama vytvorí 
-    const Image = mongoose.models[req.params.gallery] || imageModel(req.params.gallery);
+    // Kontrolujeme, či sa v galérii nachádza obrázok, ktorého id uživateľ zadal
+    const image = gallery.images.find( image => image._id == req.params.id);
 
-    // V tomto kroku kontrolujeme, že či sa fotografia nachádza v danej galérii
-    // Pokiaľ nie, navrátime 400 Bad Request
+    // Pokiaľ nie, navrátime 404 not found
+    if (!image) return res.status(404).send("Daná fotografia sa v tejto galérii nenachádza.");
+
+   
+    // Pokiaľ existuje galéria a zároveň obsahuje aj daný obrázok, tak daný obrázok zobrazíme
     
-    const image = await Image.findById(req.params.id);
-    if (!image) return res.status(400).send("Daná fotografia sa v tejto galérii nenachádza.");
-
     const imagePath = `${process.env.IMAGE_FOLDER}${image.path}`; // Priecinok kde sa nachadzaju obrazky + meno obrazka
 
    
