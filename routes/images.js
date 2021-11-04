@@ -51,8 +51,8 @@ router.get("/:gallery/:id", async (req, res) => {
     if (!image) return res.status(404).send("Daná fotografia sa v tejto galérii nenachádza.");
 
    
-    // Pokiaľ existuje galéria a zároveň obsahuje aj daný obrázok, tak daný obrázok zobrazíme
-    
+    // Pokiaľ existuje galéria a zároveň obsahuje aj daný obrázok, tak obrázok zobrazíme
+
     const imagePath = `${process.env.IMAGE_FOLDER}${image.path}`; // Priecinok kde sa nachadzaju obrazky + meno obrazka
 
    
@@ -109,15 +109,14 @@ router.post("/:gallery" ,async (req, res) => {
         }
 
         // Pokiaľ sa obrázok v kolekcii už nachádza, navrátime 400 Bad Request
-        const imagePaths = await Gallery.find({"images.path": req.file.originalname });
-        if (imagePaths.length) return res.status(400).send("Obrázok s týmto menom sa už v galérii nachádza.");
+        const imagePaths = await Gallery.findOne({"images.path": req.file.originalname });
+        if (imagePaths) return res.status(400).send("Obrázok s týmto menom sa už v galérii nachádza.");
 
         // Exif data obrázka
         const exifData = await exif(resolve(`${process.env.IMAGE_FOLDER}${req.file.originalname}`));
 
-        // Do kolekcie pridáme nový dokument obsahujúci údaje ohľadom obrázka
-
-
+        // Do kolekcie pridáme nový dokument obsahujúci údaje  obrázka
+        
         const image = await Gallery.findOneAndUpdate(
             { name: gallery }, {
             $push: {
@@ -130,14 +129,16 @@ router.post("/:gallery" ,async (req, res) => {
                     exif: exifData != undefined ? exifData : null   
                 }  
             }
-        }, { safe: true, upsert: true, new: true });
+        }, { safe: true, upsert: true, new: true }).select("images -_id").lean();
 
 
 
         // Zmenenie náhľadového obrázka pre danú galériu
         // updatePreviewImage(galleryNames[0], Image);
 
-        res.send(image);  
+        // Použivateľovi pošleme posledný obrázok z poľa obrazkkov
+        // Posledný obrázok v poli je vždy ten, čo bol najnovšie pridaný
+        res.send(image.images[ image.images.length -1]);  
 
     });
   
