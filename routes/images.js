@@ -15,7 +15,7 @@ const { resolve } = require('path');
 // Vlastné moduly
 const { Gallery } = require('../models/gallery');
 const { resizeImage, removeImage } = require('../others/image_functions');
-const { updatePreviewImage, resetPreviewImage } = require('../others/previewImage');
+const { updatePreviewImage, deletePreviewImage } = require('../others/previewImage');
 const exif = require('../others/exif');
 
 
@@ -39,15 +39,15 @@ router.get("/:gallery/:id", async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send("Id ktoré si zadal je v nesprávnom tvare.");
 
     // Hľadáme galériu podľa mena, ktoré uživateľ zadal
-    const gallery = await Gallery.findOne({ name: req.params.gallery }).select("images -_id").lean();
-
     // Pokiaľ taká galéria neexistuje, navrátime status 404 Not Found
+
+    const gallery = await Gallery.findOne({ name: req.params.gallery }).select("images -_id").lean();
     if (!gallery) return res.status(404).send("Daná galéria neexistuje.");
 
     // Kontrolujeme, či sa v galérii nachádza obrázok, ktorého id uživateľ zadal
-    const image = gallery.images.find( image => image._id == req.params.id);
-
     // Pokiaľ nie, navrátime 404 not found
+
+    const image = gallery.images.find( image => image._id == req.params.id);
     if (!image) return res.status(404).send("Daná fotografia sa v tejto galérii nenachádza.");
 
    
@@ -146,43 +146,37 @@ router.post("/:gallery" ,async (req, res) => {
 });
 
 router.delete("/:gallery/:id", async (req, res) => {
-    // Najprv pozrieme, že či daná galéria existuje, pokiaľ nie navrátime 400 Bad Request
-    const galleryNames = await Gallery.find({ name: req.params.gallery });
-    if (!galleryNames.length) return res.status(404).send("Daná galéria neexistuje."); 
-
     // Kontrola, či sme zadali správne Id
     // Pokiaľ nie, navŕatime http status 400 Bad Request
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send("Id ktoré si zadal je v nesprávnom tvare.");
 
-    // inicializacia  modelu kolekcie (podrobnejšie vysvetlené vyššie v kóde)
-    const Image = mongoose.models[req.params.gallery] || imageModel(req.params.gallery);
+    // Hľadáme galériu podľa mena, ktoré uživateľ zadal
+    // Pokiaľ taká galéria neexistuje, navrátime status 404 Not Found
 
-    // Obrázkok, ktorý musíme vymazať z priečinka
+    const gallery = await Gallery.findOne({ name: req.params.gallery }).select("images -_id").lean();
+    if (!gallery) return res.status(404).send("Daná galéria neexistuje.");
 
-    // Pozieme sa, že či sa dané Id v galérii nachádza
-    // Pokiaľ nie, navrátime 404 Not Found
+    // Kontrolujeme, či sa v galérii nachádza obrázok, ktorého id uživateľ zadal
+    // Pokiaľ nie, navrátime 404 not found
 
-    const fileToRemove = await Image.findById(req.params.id);
-    if (!fileToRemove) return res.status(404).send("Obrázok s týmto Id sa v tejto galérii nenachádza");
+    // image nám navráti objekt obrázka, ktorý ideme odstraňovať
+    const image = gallery.images.find( image => image._id == req.params.id);
+    if (!image) return res.status(404).send("Daná fotografia sa v tejto galérii nenachádza.");
 
-    // Cesta k súboru, .path obsahuje meno súboru
-    const pathToFile = `${process.env.IMAGE_FOLDER}${fileToRemove.path}`;
-
-
-    // Zmažeme dokument s daným id
-    const image = await Image.findByIdAndRemove(req.params.id);
+    const galleryWithRemovedImage = await Gallery.findOneAndUpdate(
+        {name: req.params.gallery},
+        { $pull: { images: image }},
+        { new : true }
+    ).select("images").lean();
     
-
-    // Funkcia, ktorá vymaže obrázok z priečinka
-    removeImage(pathToFile, fileToRemove.path);
-
-    // Funkcia, ktorá resetne náhľadový obrázok galérie 
-    resetPreviewImage(galleryNames[0], req.params.gallery, fileToRemove, Image);
-
+    const pathToFile = `${process.env.IMAGE_FOLDER}${image.path}`;
+    
+    // Zmazanie obrázku z priečinka a nastavenie nového náhľadového obrázku
+    removeImage(pathToFile, image.path);
+    deletePreviewImage(req.params.gallery);
+    updatePreviewImage(req.params.gallery, galleryWithRemovedImage.images[0]);
 
     res.send(image);
-
-
 
 });
 
