@@ -11,5 +11,4 @@ module.exports = () => {
     // Chceme aby meno vytvorenej kolekcie bolo rovnaké ako názov galérie
     mongoose.pluralize(null);
   
-  
 };
