@@ -62,7 +62,7 @@ const Gallery = mongoose.model("Gallery", new mongoose.Schema({
 
 function validateGallery(gallery) {
     const schema = {
-        name: Joi.string().min(3).max(15).invalid("gallery", "galleries", "log").required()
+        name: Joi.string().min(3).max(15).required()
     }
 
     return Joi.validate(gallery, schema);
