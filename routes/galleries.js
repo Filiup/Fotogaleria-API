@@ -81,11 +81,8 @@ router.put("/:id", async (req, res) => {
     // Pokiaľ nie, navŕatime http status 400 Bad Request
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send("Id ktoré si zadal je v nesprávnom tvare.");
 
-    // Údaje galérie, ktorú ideme upraviť ( potrebujeme údaj "name" aby sme vedeli upraviť aj meno jej kolekcie )
-    const galleryData = await Gallery.findById(req.params.id);
-    if (!galleryData) return res.status(404).send("Gallery with the given id was not found.");
-
-
+    // Kontrolujeme, že či uźivateľ zadal nové meno v správnom tvare 
+    // Pokiaľ nie, navrátime 400 Bad request
     const { error } = validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
@@ -93,7 +90,10 @@ router.put("/:id", async (req, res) => {
         name: req.body.name
     };
 
+    // Zmeníme meno galérie
+    // Pokiaľ galéria s daným id neexistuje, navrátime 404 Not Found
     const gallery = await Gallery.findByIdAndUpdate(req.params.id, params, { new: true }).select("-images");
+    if (!gallery) return  res.status(404).send("Gallery with the given id was not found.");
     res.send(gallery);
 
 
@@ -106,20 +106,14 @@ router.delete("/:id", async (req, res) => {
     // Pokiaľ nie, navŕatime http status 400 Bad Request
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send("Id ktoré si zadal je v nesprávnom tvare.");
 
-    // Údaje galérie, ktorú ideme zmazať ( potrebujeme údaj "name" aby sme vedeli zmazať jej kolekciu )
-    const galleryData = await Gallery.findById(req.params.id);
-    if (!galleryData) return res.status(404).send("Galéria s týmto id sa nenašla");
-    
-    const gallery = await Gallery.findByIdAndRemove(req.params.id);
+    // Odstránime galériu
+    // Pokiaľ galéria s daným id neexistuje, navrátime 404 Not Found
+    const gallery = await Gallery.findByIdAndRemove(req.params.id).select("images").lean();
+    if (!gallery) return res.status(404).send("Galéria s týmto id sa nenašla");
 
-    // Inicializujeme kolekciu obrázkov pre danú gelériu (Potrebujeme z nej získať mená obrázkov )
-    const Image = mongoose.models[galleryData.name] || imageModel(galleryData.name);
-
-    // Všetok obsah kolekcie obrázkov danej galérie 
-    const images = await Gallery.images.find().lean();
 
     // Zmažeme všetky obrázky, ktoré patria danej galérii
-    images.forEach(image => {
+    gallery.images.forEach(image => {
         removeImage(`${process.env.IMAGE_FOLDER}${image.path}`, image.path);
     });
             
