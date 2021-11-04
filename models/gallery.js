@@ -45,7 +45,6 @@ const Gallery = mongoose.model("Gallery", new mongoose.Schema({
 
     preview: {
         type: new mongoose.Schema(imageSchema, { _id : false }),
-        default: null,
     },
 
     images: {

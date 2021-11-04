@@ -116,7 +116,7 @@ router.post("/:gallery" ,async (req, res) => {
         const exifData = await exif(resolve(`${process.env.IMAGE_FOLDER}${req.file.originalname}`));
 
         // Do kolekcie pridáme nový dokument obsahujúci údaje  obrázka
-        
+
         const image = await Gallery.findOneAndUpdate(
             { name: gallery }, {
             $push: {
@@ -134,7 +134,8 @@ router.post("/:gallery" ,async (req, res) => {
 
 
         // Zmenenie náhľadového obrázka pre danú galériu
-        // updatePreviewImage(galleryNames[0], Image);
+        // Funkcii posielame vždy prvý obrázok z poľa
+        updatePreviewImage(req.params.gallery, image.images[0]);
 
         // Použivateľovi pošleme posledný obrázok z poľa obrazkkov
         // Posledný obrázok v poli je vždy ten, čo bol najnovšie pridaný

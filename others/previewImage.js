@@ -10,7 +10,7 @@ async function deletePreviewImage(galleryName) {
 
 }
 
-
+/*
 async function updatePreviewImage(gallery, imageModel) {
     // Z databázy vytiahneme všetky obrázky pre daný ImageModel a potom z nich vyberieme len ten prvý ( Prvý obrázok bude vždy náhľadový )
     const images = await imageModel.find().lean().select("-_id -__v"); 
@@ -30,6 +30,17 @@ async function updatePreviewImage(gallery, imageModel) {
     }
   
   };
+*/
+async function updatePreviewImage(GalleryName, image) {
+    await Gallery.findOneAndUpdate({name : GalleryName}, {
+        preview: {
+            path: image.path,
+            fullpath: image.fullpath,
+            name: image.name,
+            uploaded: image.uploaded
+        }
+    });
+};
   
 async function resetPreviewImage(galleryModel, galleryName, imageDocument, imageModel) {
     const GalleryPreview = galleryModel.image;
