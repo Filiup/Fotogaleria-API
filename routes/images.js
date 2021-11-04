@@ -84,8 +84,6 @@ router.get("/:gallery/:id", async (req, res) => {
 
 // Form data
 router.post("/:gallery" ,async (req, res) => {
-    const gallery = req.params.gallery;
-
     // Middleware, ktorý nám do Request objektu pribalí file a uloźi za nás obrázok do priečinka
     upload(req, res, async err => {
         // Error patriaci knižnici multer
@@ -102,15 +100,15 @@ router.post("/:gallery" ,async (req, res) => {
         }
         
         // Skontrolujeme, či galéria ktorú uživateľ zadal ako :id existuje, pokiaľ nie navrátime 404 Not Found a odstránime obrázok, ktorý middleware nahral
-        const galleryNames = await Gallery.find({ name: gallery });
-        if (!galleryNames.length) {
+        const gallery = await Gallery.findOne({ name: req.params.gallery }).select("images").lean();
+        if (!gallery) {
             removeImage(`${process.env.IMAGE_FOLDER}${req.file.originalname}`, req.file.originalname);
             return res.status(404).send("Daná galéria neexistuje.");
         }
 
-        // Pokiaľ sa obrázok v kolekcii už nachádza, navrátime 400 Bad Request
-        const imagePaths = await Gallery.findOne({"images.path": req.file.originalname });
-        if (imagePaths) return res.status(400).send("Obrázok s týmto menom sa už v galérii nachádza.");
+       // Pokiaľ sa obrázok v kolekcii už nachádza, navrátime 400 Bad Request
+       const sameImage = gallery.images ? gallery.images.find( image => image.path == req.file.originalname) : false;
+       if (sameImage) return res.status(400).send("Obrázok s týmto menom sa už v galérii nachádza.");
 
         // Exif data obrázka
         const exifData = await exif(resolve(`${process.env.IMAGE_FOLDER}${req.file.originalname}`));
@@ -118,7 +116,7 @@ router.post("/:gallery" ,async (req, res) => {
         // Do kolekcie pridáme nový dokument obsahujúci údaje  obrázka
 
         const image = await Gallery.findOneAndUpdate(
-            { name: gallery }, {
+            { name: req.params.gallery }, {
             $push: {
                 images: {
                     path: req.file.originalname,
@@ -129,7 +127,7 @@ router.post("/:gallery" ,async (req, res) => {
                     exif: exifData != undefined ? exifData : null   
                 }  
             }
-        }, { safe: true, upsert: true, new: true }).select("images -_id").lean();
+        }, { safe: true, upsert: true, new: true }).select("images").lean();
 
 
 
