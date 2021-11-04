@@ -1,11 +1,9 @@
 const express = require('express');
-const { Gallery, validate } = require('../models/gallery');
+const { Gallery, validate, validateSize } = require('../models/gallery');
 const mongoose = require('mongoose');
 
 const { removeImage, resizeImage } = require('../others/image_functions');
 const { resolve } = require('path');
-
-const winston = require("winston");
 
 const router = express.Router();
 
@@ -22,9 +20,10 @@ router.get("/:id", async (req, res) => {
     const gallery = await Gallery.findById(req.params.id).select("-images");
     if (!gallery) return res.status(404).send("Gallery with the given id was not found");
 
+
     // Pokiaľ gallery.image == null, tak sa ako náhľadový obrázok nastaví default.jpg
     // Pokiaľ nie, tak sa ako náhľadový obrázok zobrazí ten, ktorý má daná galéria nastavený (Pre lepšie pochopenie si pozrite "Ternary operatori") 
-    const image = `${process.env.IMAGE_FOLDER}${gallery.image == null ? "/../default.jpg" : gallery.image.path}`;
+    const image = `${process.env.IMAGE_FOLDER}${gallery.preview == null ? "/../default.jpg" : gallery.preview.path}`;
 
      // Pokiaľ uživateľ zadal query string
     if (Object.keys(req.query).length) {
