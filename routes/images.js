@@ -22,11 +22,11 @@ const exif = require('../others/exif');
 
 router.get("/:gallery", async (req, res) => {
     // Najprv pozrieme, že či daná galéria existuje, pokiaľ nie navrátime 400 Bad Request
-    const images = await Gallery.find({name: req.params.gallery}).select("images -_id").lean();
-    if (!images.length) return res.status(404).send("Daná galéria neexistuje.");
+    const images = await Gallery.findOne({name: req.params.gallery}).select("images -_id").lean();
+    if (!images) return res.status(404).send("Daná galéria neexistuje.");
 
 
-    res.send(images[0].images);
+    res.send(images.images);
 
     
 });
