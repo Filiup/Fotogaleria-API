@@ -6,10 +6,5 @@ module.exports = () => {
     .then(() => winston.info('Connected to MongoDB...'))
   
     mongoose.set('useFindAndModify', false);
-  
-    // Zakážeme, aby driver mnogoose menil mená kolekcií automaticky do plurálu (Mohlo by to robiť problémi )
-    // Chceme aby meno vytvorenej kolekcie bolo rovnaké ako názov galérie
-    mongoose.pluralize(null);
-  
-  
+
 };
