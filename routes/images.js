@@ -13,7 +13,7 @@ const upload = config.single("image");
 const { resolve } = require('path');
 
 // Vlastné moduly
-const { Gallery } = require('../models/gallery');
+const { Gallery, validateSize } = require('../models/gallery');
 const { resizeImage, removeImage } = require('../others/image_functions');
 const { updatePreviewImage, deletePreviewImage } = require('../others/previewImage');
 const exif = require('../others/exif');
