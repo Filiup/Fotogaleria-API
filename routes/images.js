@@ -15,7 +15,6 @@ const { resolve } = require('path');
 // Vlastné moduly
 const { Gallery, validateSize } = require('../models/gallery');
 const { resizeImage, removeImage } = require('../others/image_functions');
-const { updatePreviewImage, deletePreviewImage } = require('../others/previewImage');
 const exif = require('../others/exif');
 
 
@@ -130,11 +129,6 @@ router.post("/:gallery" ,async (req, res) => {
         }, { safe: true, upsert: true, new: true }).select("images").lean();
 
 
-
-        // Zmenenie náhľadového obrázka pre danú galériu
-        // Funkcii posielame vždy prvý obrázok z poľa
-        updatePreviewImage(req.params.gallery, image.images[0]);
-
         // Použivateľovi pošleme posledný obrázok z poľa obrazkkov
         // Posledný obrázok v poli je vždy ten, čo bol najnovšie pridaný
         res.send(image.images[ image.images.length -1]);  
@@ -161,24 +155,17 @@ router.delete("/:gallery/:id", async (req, res) => {
     const image = gallery.images.find( image => image._id == req.params.id);
     if (!image) return res.status(404).send("Daná fotografia sa v tejto galérii nenachádza.");
 
-    const galleryWithRemovedImage = await Gallery.findOneAndUpdate(
+    await Gallery.findOneAndUpdate(
         {name: req.params.gallery},
         { $pull: { images: image }},
         { new : true }
-    ).select("images").lean();
+    );
     
-    const pathToFile = `${process.env.IMAGE_FOLDER}${image.path}`;
-    
-    // Zmazanie obrázku z priečinka a nastavenie nového náhľadového obrázku
-    removeImage(pathToFile, image.path);
-    deletePreviewImage(req.params.gallery);
-    updatePreviewImage(req.params.gallery, galleryWithRemovedImage.images[0]);
-
     res.send(image);
 
 });
 
-// Pokiaľ uźivateľ nezadná meno galérie, pošleme mu http status status 404 (Not found) 
+// Pokiaľ použivateľ nezadná meno galérie, pošleme mu http status status 404 (Not found) 
 // Upozorníme ho, aby tak učinil
 
 router.all("/", (req, res) => res.status(404).send("You must enter a gallery name."));
