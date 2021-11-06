@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
 
-const imageSchema = {
+const imageSchema = new mongoose.Schema({
     path: {
         type: String,
         minlength: 3,
@@ -26,8 +26,14 @@ const imageSchema = {
     uploaded: {
         type: Date,
         default: Date.now()
+    },
+
+    exif: {
+        type: Object,
+        default: null
     }
-};
+});
+
 
 const Gallery = mongoose.model("Gallery", new mongoose.Schema({
     name: {
@@ -43,18 +49,9 @@ const Gallery = mongoose.model("Gallery", new mongoose.Schema({
         default: Date.now()
     },
 
-    preview: {
-        type: new mongoose.Schema(imageSchema, { _id : false }),
-    },
 
     images: {
-        type: new mongoose.Schema({ ... imageSchema, ... {
-            exif: {
-                type: Object,
-                default: null
-            }
-            
-        } })
+        type: imageSchema
     }
 
 
