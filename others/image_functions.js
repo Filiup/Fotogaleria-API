@@ -15,7 +15,9 @@ async function resizeImage(image, width, height) {
 
 };
 
-function removeImage(path, name) {
+function removeImage(name) {
+  const path = `${process.env.IMAGE_FOLDER}${name}`;
+  
   unlink(path, function(err) {
       if (err) {
         winston.error(`${name} was not removed: ${err.message}`, err);
