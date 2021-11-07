@@ -125,9 +125,7 @@ router.delete("/:id", async (req, res) => {
             removeImage(image.path);
         });
     }
-
-    // Odstránenie image prop z odpovedi API
-    delete gallery.images;      
+     
     res.send(gallery);
 
 });
