@@ -101,7 +101,7 @@ router.post("/:gallery" ,async (req, res) => {
         // Skontrolujeme, či galéria ktorú uživateľ zadal ako :id existuje, pokiaľ nie navrátime 404 Not Found a odstránime obrázok, ktorý middleware nahral
         const gallery = await Gallery.findOne({ name: req.params.gallery }).select("images").lean();
         if (!gallery) {
-            removeImage(`${process.env.IMAGE_FOLDER}${req.file.originalname}`, req.file.originalname);
+            removeImage(req.file.originalname);
             return res.status(404).send("Daná galéria neexistuje.");
         }
 
@@ -161,6 +161,8 @@ router.delete("/:gallery/:id", async (req, res) => {
         { new : true }
     );
     
+    // Zmazanie obrazka z priecinka
+    removeImage(image.path); 
     res.send(image);
 
 });

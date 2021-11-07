@@ -121,7 +121,7 @@ router.delete("/:id", async (req, res) => {
 
     // Zmažeme všetky obrázky, ktoré patria danej galérii
     gallery.images.forEach(image => {
-        removeImage(`${process.env.IMAGE_FOLDER}${image.path}`, image.path);
+        removeImage(image.path);
     });
             
     res.send(gallery);
