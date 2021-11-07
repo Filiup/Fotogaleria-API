@@ -115,15 +115,19 @@ router.delete("/:id", async (req, res) => {
 
     // Odstránime galériu
     // Pokiaľ galéria s daným id neexistuje, navrátime 404 Not Found
-    const gallery = await Gallery.findByIdAndRemove(req.params.id).select("images").lean();
+    const gallery = await Gallery.findByIdAndRemove(req.params.id).lean();
     if (!gallery) return res.status(404).send("Galéria s týmto id sa nenašla");
 
 
     // Zmažeme všetky obrázky, ktoré patria danej galérii
-    gallery.images.forEach(image => {
-        removeImage(image.path);
-    });
-            
+    if ( gallery.images instanceof Array ) {
+        gallery.images.forEach(image => {
+            removeImage(image.path);
+        });
+    }
+
+    // Odstránenie image prop z odpovedi API
+    delete gallery.images;      
     res.send(gallery);
 
 });
