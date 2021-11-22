@@ -18,16 +18,12 @@ const imageSize = (imagePath) => {
 
 
 async function resizeImage(image, width, height) {
-
+    let resizedPhoto;
     const originalSize = await imageSize(image);
 
     // Pokial nebol zadany rozmer, tak si ho dopocitame
     if (!width) width = height/originalSize.height * originalSize.width;
     else if (!height) height = width/originalSize.width * originalSize.height;
-
-     
-    let resizedPhoto;
-    
 
     await sharp(image)
       .resize({ width: parseInt(width), height: parseInt(height), fit: 'fill' })
