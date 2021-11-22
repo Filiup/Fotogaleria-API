@@ -67,8 +67,8 @@ function validateGallery(gallery) {
 
 function validateSize(size) {
     const schema = {
-        width: Joi.number().integer().min(200).max(2000).required(),
-        height: Joi.number().integer().min(200).max(2000).required()
+        width: Joi.number().integer().min(200).max(2000),
+        height: Joi.number().integer().min(200).max(2000)
 
     };
     return Joi.validate(size, schema);
