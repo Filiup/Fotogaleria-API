@@ -4,7 +4,7 @@
 2. Zapnutie aplikácie: ``` docker compose -f api-docker-compose.yaml up ```
 3. Vypnutie aplikácie: ``` docker compose -f api-docker-compose.yaml down ```
 
-Po zapnutí bude API bežať na porte **3000**
+Po zapnutí bude API bežať na porte **3000**  
 Mongo-express ( webové GUI pre MongoDB ) bude bežať na porte **8080**
 
 # Niečo o projekte
