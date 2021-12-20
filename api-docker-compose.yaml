@@ -9,6 +9,13 @@ services:
     image: mongo
     ports:
       - 27017:27017
+
+    # Na volume "mongo-data" budeme ukladat /data/db (DB subory v mongodb kontaineri)
+    # V /data/db sa ukladaju vsetky data "mongo-db"
+    # Pre mysql by to bolo: /var/lib/mysql 
+
+    volumes:
+      - mongo-data:/data/db
       
   mongo-express:
     image: mongo-express
@@ -18,7 +25,16 @@ services:
       - ME_CONFIG_MONGODB_SERVER=mongodb
     restart: always
 
-      
+# Vytvorime "mongo-data" volume
+# Po vypnuti containeru sa vždy stratia vsetky jeho data ( nase udaje v databaze )
+# Vytvorenim volume tomu zabranime, vsetky udaje z DB sa budu ukladat aj do nasho host PC
+# Pri vypnuti/restartovani kontainera sa jednoducho len replikuju
+
+# Miesto, kde sa ukladaju volumes (GNU/Linux): /var/lib/docker/volumes
+
+volumes:
+  mongo-data:
+    driver: local      
 
 
 
