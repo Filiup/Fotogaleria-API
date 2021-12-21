@@ -5,6 +5,9 @@ services:
     ports:
       - 3000:3000
 
+    volumes:
+      - api-images:/app/images/galleries
+
   mongodb:
     image: mongo
     ports:
@@ -34,8 +37,10 @@ services:
 
 volumes:
   mongo-data:
-    driver: local      
+    driver: local
 
+  api-images:
+    driver: local   
 
 
 
