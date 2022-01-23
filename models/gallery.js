@@ -72,6 +72,7 @@ function validateSize(size) {
         
         // Na tento parameter by mala aplikacia posielat random cislo vygenerovane cez Math.random()
         // Sluzi to na to aby sa vygeneroval stale iny link a donutili sme tak re-render nahladoveho obrazka pri jeho zmene na iny
+        // Jedna sa o riesenie "chrome cache" bugu, keby ze aplikacia tento parameter neposle tak "chrome" obrazok nezmeni
         random: Joi.number()
 
     };
