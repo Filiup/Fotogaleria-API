@@ -68,7 +68,11 @@ function validateGallery(gallery) {
 function validateSize(size) {
     const schema = {
         width: Joi.number().integer().min(200).max(2000),
-        height: Joi.number().integer().min(200).max(2000)
+        height: Joi.number().integer().min(200).max(2000),
+        
+        // Na tento parameter by mala aplikacia posielat random cislo vygenerovane cez Math.random()
+        // Sluzi to na to aby sa vygeneroval stale iny link a donutili sme tak re-render nahladoveho obrazka pri jeho zmene na iny
+        random: Joi.number()
 
     };
     return Joi.validate(size, schema);
