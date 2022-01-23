@@ -96,6 +96,13 @@ router.put("/:id", async (req, res) => {
   const { error } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 
+  // Skontrolujeme, či galéria s rovnakým menom už neexistuje
+  // Pokiaľ áno, navrátime 400 Bad Request
+
+  const galleryNames = await Gallery.find({ name: req.body.name });
+  if (galleryNames.length)
+    return res.status(400).send("Galéria s týmto názvom už existuje.");
+
   const params = {
     name: req.body.name,
   };
