@@ -7,6 +7,9 @@ const { resolve } = require("path");
 
 const router = express.Router();
 
+// Funkcia, ktora porovna 2 polia
+const equals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
 router.get("/", async (req, res) => {
   const galleries = await Gallery.find().select("-images").lean();
   res.send(galleries);
@@ -133,11 +136,17 @@ router.delete("/:id", async (req, res) => {
 
   // Nájdeme všetky galérie okrem tej, ktorú ideme zmazať, z údajov budeme selectovať len "images.path" (mená ich obrázkov)
   const images = await Gallery.find({name: {$ne: gallery.name}}).select("images.path -_id").lean();
+  console.log(images);
 
-  // pole "images" upravíme tak, aby sme dostali iba "1D" pole obsahujúce mená obrázkov všetkých galerií okrem tej, ktorú ideme zmazať
-  // vyzerať bude daakto takto: ["image1.png", "image2.png", "image3.png"]
-  let names = images.map((image) => image.images.map(path => path.path) );
-  names = [].concat(...names);
+  let names;
+  // Pokiaľ sa v poly nenchádza len prázdny objekt
+  if (!equals(images, [{}] )) {
+
+    // pole "images" upravíme tak, aby sme dostali iba "1D" pole obsahujúce mená obrázkov všetkých galerií okrem tej, ktorú ideme zmazať
+    // vyzerať bude daakto takto: ["image1.png", "image2.png", "image3.png"]
+    names = images.map((image) => image.images.map(path => path.path) );
+    names = [].concat(...names);
+  } else names = [];
 
   // Zmažeme všetky obrázky, ktoré patria danej galérii
   if (gallery.images instanceof Array) {
