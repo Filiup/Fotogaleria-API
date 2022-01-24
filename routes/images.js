@@ -163,7 +163,7 @@ router.delete("/:gallery/:id", async (req, res) => {
     /* V tomto kroku zabránime tomu, aby sa vymazal obrázok aj napriek tomu, ze sa nachádza aj v inej galérii*/
 
     // Nájdeme všetky galérie okrem tej, ktorú ideme zmazať, z údajov budeme selectovať len "images.path" (mená ich obrázkov)
-    const images = await Gallery.find({name: {$ne: gallery.name}}).select("images.path -_id").lean();
+    let images = await Gallery.find({name: {$ne: gallery.name}}).select("images.path -_id").lean();
 
     let names = [];
     // Pokiaľ nie sú všetky objekty v poly images prázdne (ostatné galérie majú obrázky)
