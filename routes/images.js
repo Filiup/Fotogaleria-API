@@ -160,9 +160,20 @@ router.delete("/:gallery/:id", async (req, res) => {
         { $pull: { images: image }},
         { new : true }
     );
+
+    /* V tomto kroku zabránime tomu, aby sa vymazal obrázok aj napriek tomu, ze sa nachádza aj v inej galérii*/
+
+    // Nájdeme všetky galérie okrem tej, ktorú ideme zmazať, z údajov budeme selectovať len "images.path" (mená ich obrázkov)
+    const images = await Gallery.find({name: {$ne: gallery.name}}).select("images.path -_id").lean();
+
+    // pole "images" upravíme tak, aby sme dostali iba "1D" pole obsahujúce mená obrázkov všetkých galerií okrem tej, ktorú ideme zmazať
+    // vyzerať bude daakto takto: ["image1.png", "image2.png", "image3.png"]
+    let names = images.map((image) => image.images.map(path => path.path) );
+    names = [].concat(...names);
     
-    // Zmazanie obrazka z priecinka
-    removeImage(image.path); 
+    // Zmazanie obrazka z priecinka, 
+    // Obrázok zmažeme len vtedy, ked sa nenachádza v poly "names" (nenachádza sa ešte aj v inej galérii)
+    if (!names.includes(image.path) ) removeImage(image.path); 
     res.send(image);
 
 });
