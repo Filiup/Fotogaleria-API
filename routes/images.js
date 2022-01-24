@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const winston = require('winston');
+const { isEmpty } = require("lodash");
 
 const router = express.Router();
 
@@ -16,10 +17,6 @@ const { resolve } = require('path');
 const { Gallery, validateSize } = require('../models/gallery');
 const { resizeImage, removeImage } = require('../others/image_functions');
 const exif = require('../others/exif');
-
-// Funkcia, ktora porovna 2 polia
-const equals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
-
 
 router.get("/:gallery", async (req, res) => {
     // Najprv pozrieme, že či daná galéria existuje, pokiaľ nie navrátime 400 Bad Request
@@ -168,15 +165,19 @@ router.delete("/:gallery/:id", async (req, res) => {
     // Nájdeme všetky galérie okrem tej, ktorú ideme zmazať, z údajov budeme selectovať len "images.path" (mená ich obrázkov)
     const images = await Gallery.find({name: {$ne: gallery.name}}).select("images.path -_id").lean();
 
-    let names;
-    // Pokiaľ sa v poly nenchádza len prázdny objekt
-    if (!equals(images, [{}] )) {
+    let names = [];
+    // Pokiaľ nie sú všetky objekty v poly images prázdne (ostatné galérie majú obrázky)
+    if (!images.every(image => isEmpty(image))) {
+        // Pokiaľ pole images obsahuje nejaké objekty ktoré nemajú "images" property (daktoré galérie nemajú obrázky), tak ich vyfiltrujeme preč
+        images = images.filter(image => image.hasOwnProperty("images"));
+        //
+    
 
         // pole "images" upravíme tak, aby sme dostali iba "1D" pole obsahujúce mená obrázkov všetkých galerií okrem tej, ktorú ideme zmazať
         // vyzerať bude daakto takto: ["image1.png", "image2.png", "image3.png"]
         names = images.map((image) => image.images.map(path => path.path) );
         names = [].concat(...names);
-    } else names = [];
+    } 
     
     // Zmazanie obrazka z priecinka, 
     // Obrázok zmažeme len vtedy, ked sa nenachádza v poly "names" (nenachádza sa ešte aj v inej galérii)

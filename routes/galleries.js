@@ -1,14 +1,13 @@
 const express = require("express");
 const { Gallery, validate, validateSize } = require("../models/gallery");
 const mongoose = require("mongoose");
+const { isEmpty } = require("lodash");
 
 const { removeImage, resizeImage } = require("../others/image_functions");
 const { resolve } = require("path");
 
 const router = express.Router();
 
-// Funkcia, ktora porovna 2 polia
-const equals = (a, b) => JSON.stringify(a) === JSON.stringify(b);
 
 router.get("/", async (req, res) => {
   const galleries = await Gallery.find().select("-images").lean();
@@ -90,9 +89,7 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   // Kontrola, či sme zadali správne Id
-  // Pokiaľ nie, navŕatime http status 400 Bad Request
-  if (!mongoose.Types.ObjectId.isValid(req.params.id))
-    return res.status(400).send("Id ktoré si zadal je v nesprávnom tvare.");
+  // Pokiaľ nie, navŕatime http status 400map(el => el.gogo.filter(path => !isEmpty(path) ))adal je v nesprávnom tvare.");
 
   // Kontrolujeme, že či uźivateľ zadal nové meno v správnom tvare
   // Pokiaľ nie, navrátime 400 Bad request
@@ -132,21 +129,29 @@ router.delete("/:id", async (req, res) => {
   if (!gallery) return res.status(404).send("Galéria s týmto id sa nenašla");
 
 
+
   /* V tomto kroku zabránime tomu, aby sa vymazal obrázok aj napriek tomu, ze sa nachádza aj v inej galérii*/
 
   // Nájdeme všetky galérie okrem tej, ktorú ideme zmazať, z údajov budeme selectovať len "images.path" (mená ich obrázkov)
-  const images = await Gallery.find({name: {$ne: gallery.name}}).select("images.path -_id").lean();
-  console.log(images);
+  let images = await Gallery.find({name: {$ne: gallery.name}}).select("images.path -_id").lean();
+  let names = [];
 
-  let names;
-  // Pokiaľ sa v poly nenchádza len prázdny objekt
-  if (!equals(images, [{}] )) {
-
+  // Pokiaľ nie sú všetky objekty v poly images prázdne (ostatné galérie majú obrázky)
+  if (!images.every(image => isEmpty(image))) {
+    // Pokiaľ pole images obsahuje nejaké objekty ktoré nemajú "images" property (daktoré galérie nemajú obrázky), tak ich vyfiltrujeme preč
+    images = images.filter(image => image.hasOwnProperty("images"));
+    //
+    
     // pole "images" upravíme tak, aby sme dostali iba "1D" pole obsahujúce mená obrázkov všetkých galerií okrem tej, ktorú ideme zmazať
     // vyzerať bude daakto takto: ["image1.png", "image2.png", "image3.png"]
+
     names = images.map((image) => image.images.map(path => path.path) );
     names = [].concat(...names);
-  } else names = [];
+  
+  } 
+
+
+
 
   // Zmažeme všetky obrázky, ktoré patria danej galérii
   if (gallery.images instanceof Array) {
