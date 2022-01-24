@@ -128,10 +128,23 @@ router.delete("/:id", async (req, res) => {
   const gallery = await Gallery.findByIdAndRemove(req.params.id).lean();
   if (!gallery) return res.status(404).send("Galéria s týmto id sa nenašla");
 
+
+  /* V tomto kroku zabranime tomu, aby sa vymazal obrázok aj napriek tomu, ze sa nachadza aj v inej galerii*/
+
+  // Nájdeme všetky galerie okrem tej, ktorá bola zmazaná, z udajov budeme selectovat len "images.path" (mena ich obrazkov)
+  const images = await Gallery.find({name: {$ne: gallery.name}}).select("images.path -_id").lean();
+
+  // pole "images" upravime tak, aby sme dostali iba "1D" pole obsahujuce mena obrazkov vsetkych galerii okrem tej, co sme zmazali
+  // vyzerať bude daakto takto: ["image1.png", "image2.png", "image3.png"]
+  let names = images.map((image) => image.images.map(path => path.path) );
+  names = [].concat(...names);
+
   // Zmažeme všetky obrázky, ktoré patria danej galérii
   if (gallery.images instanceof Array) {
     gallery.images.forEach((image) => {
-      removeImage(image.path);
+      // Obrazok zmazeme len vtedy, ked sa nenachadza v poly "names" (nenachadza sa este aj v inej galerii)
+      if (!names.includes(image.path) )
+        removeImage(image.path);
     });
   }
 
