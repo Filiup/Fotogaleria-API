@@ -175,7 +175,7 @@ router.delete("/:gallery/:id", async (req, res) => {
     // Hľadáme galériu podľa mena, ktoré uživateľ zadal
     // Pokiaľ taká galéria neexistuje, navrátime status 404 Not Found
 
-    const gallery = await Gallery.findOne({ name: req.params.gallery }).select("images -_id").lean();
+    const gallery = await Gallery.findOne({ name: req.params.gallery }).select("images preview -_id").lean();
     if (!gallery) return res.status(404).send("Daná galéria neexistuje.");
 
     // Kontrolujeme, či sa v galérii nachádza obrázok, ktorého id uživateľ zadal
@@ -190,7 +190,28 @@ router.delete("/:gallery/:id", async (req, res) => {
         { $pull: { images: image }},
         { new : true }
     );
+    
+    /* V tomto ktoku budeme meniť nahladový obrázok v prípade, že sme zmazali ten, čo bol pôvodne nastavený */
 
+    // Náhľadový obrázok budeme meniť len vtedy ak:
+        // sme zmazali ten obrázok, ktorý bol nastavený ako náhľadový
+        // galéria ( pred zmazaním obrázka ) obsahuje viac ako jeden obrázok
+
+    if ( (gallery.preview == req.params.id) && gallery.images.length > 1) {
+        let newPreviewIndex;
+        let removedImageIndex = gallery.images.findIndex(image => image._id == req.params.id);
+        if (removedImageIndex == 0) newPreviewIndex = 1;
+        else newPreviewIndex = 0;
+
+        await Gallery.updateOne(
+            {name: req.params.gallery}, {
+                preview: gallery.images[newPreviewIndex]._id
+            }
+        )
+    
+    }
+
+    
     /* V tomto kroku zabránime tomu, aby sa vymazal obrázok aj napriek tomu, ze sa nachádza aj v inej galérii*/
 
     // Nájdeme všetky galérie okrem tej, ktorú ideme zmazať, z údajov budeme selectovať len "images.path" (mená ich obrázkov)

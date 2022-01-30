@@ -147,9 +147,6 @@ router.delete("/:id", async (req, res) => {
   
   } 
 
-
-
-
   // Zmažeme všetky obrázky, ktoré patria danej galérii
   if (gallery.images instanceof Array) {
     gallery.images.forEach((image) => {
