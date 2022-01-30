@@ -185,10 +185,9 @@ router.delete("/:gallery/:id", async (req, res) => {
     const image = gallery.images.find( image => image._id == req.params.id);
     if (!image) return res.status(404).send("Daná fotografia sa v tejto galérii nenachádza.");
 
-    await Gallery.findOneAndUpdate(
+    await Gallery.updateOne(
         {name: req.params.gallery},
-        { $pull: { images: image }},
-        { new : true }
+        { $pull: { images: image }}
     );
     
     /* V tomto ktoku budeme meniť nahladový obrázok v prípade, že sme zmazali ten, čo bol pôvodne nastavený */
