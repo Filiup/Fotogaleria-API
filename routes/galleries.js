@@ -18,20 +18,17 @@ router.get("/:id", async (req, res) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.id))
     return res.status(400).send("Id ktoré si zadal je v nesprávnom tvare.");
 
-  // Metóda populate() nám z gallery.images poľa vytiahne prvý obrázok, kt. bude vždy náhľadový
-  const gallery = await Gallery.findById(req.params.id)
-    .populate("images")
-    .lean();
+  
+  // Skontrolujeme, či galéria s daným id existuje
+  // Pokial nie tak navrátime 404 not found
+  const gallery = await Gallery.findById(req.params.id).lean();
   if (!gallery)
     return res.status(404).send("Gallery with the given id was not found");
-
-  // gallery.images premenujeme na gallery.preview
-  gallery.preview = gallery.images;
-  delete gallery.images;
-
-  // Pokiaľ nám metóda populate() navráti pole, tak preview vymažeme
-  if (gallery.preview instanceof Array) delete gallery.preview;
-
+  
+  // Nahradime preview """foreign Key""" obrázkom, ktorý mu prináleží 
+  if (gallery.preview)
+    gallery.preview = gallery.images.find(image => image._id.toString() == gallery.preview.toString());
+  
   // Pokiaľ gallery.preview nie je nastavené, tak sa ako náhľadový obrázok nastaví default.jpg
   // Pokiaľ nie, tak sa ako náhľadový obrázok zobrazí ten, ktorý má daná galéria nastavený (Pre lepšie pochopenie si pozrite "Ternary operatori")
   const image = `${process.env.IMAGE_FOLDER}${

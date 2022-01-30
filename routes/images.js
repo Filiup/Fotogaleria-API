@@ -103,7 +103,6 @@ router.post("/:gallery" ,async (req, res) => {
             removeImage(req.file.originalname);
             return res.status(404).send("Daná galéria neexistuje.");
         }
-
        // Pokiaľ sa obrázok v kolekcii už nachádza, navrátime 400 Bad Request
        const sameImage = gallery.images ? gallery.images.find( image => image.path == req.file.originalname) : false;
        if (sameImage) return res.status(400).send("Obrázok s týmto menom sa už v galérii nachádza.");
@@ -112,7 +111,7 @@ router.post("/:gallery" ,async (req, res) => {
         const exifData = await exif(resolve(`${process.env.IMAGE_FOLDER}${req.file.originalname}`));
 
         // Do kolekcie pridáme nový dokument obsahujúci údaje  obrázka
-
+        // if (!gallery.hasOwnProperty("images")) gallery.images = [];
         const image = await Gallery.findOneAndUpdate(
             { name: req.params.gallery }, {
             $push: {
@@ -127,13 +126,45 @@ router.post("/:gallery" ,async (req, res) => {
             }
         }, { safe: true, upsert: true, new: true }).select("images").lean();
 
-
+        if (image.images.length == 1) {
+            const id = image.images[0]._id;
+             await Gallery.updateOne(
+                { name: req.params.gallery }, {
+                    preview: id, 
+                }
+            );
+        }
         // Použivateľovi pošleme posledný obrázok z poľa obrazkkov
         // Posledný obrázok v poli je vždy ten, čo bol najnovšie pridaný
         res.send(image.images[ image.images.length -1]);  
 
     });
   
+});
+
+router.put("/:gallery/:id", async (req, res) => {
+    // Kontrola, či sme zadali správne Id
+    // Pokiaľ nie, navŕatime http status 400 Bad Request
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) return res.status(400).send("Id ktoré si zadal je v nesprávnom tvare."); 
+
+    // Hľadáme galériu podľa mena, ktoré uživateľ zadal
+    // Pokiaľ taká galéria neexistuje, navrátime status 404 Not Found
+    const gallery = await Gallery.findOne({ name: req.params.gallery }).select("images -_id").lean();
+    if (!gallery) return res.status(404).send("Daná galéria neexistuje.");
+
+    // Kontrolujeme, či sa v galérii nachádza obrázok, ktorého id uživateľ zadal
+    // Pokiaľ nie, navrátime 404 not found
+    const image = gallery.images.find( image => image._id == req.params.id);
+    if (!image) return res.status(404).send("Daná fotografia sa v tejto galérii nenachádza.");
+
+    // Zmenime nahladovy obrazok na ten, koteho id uzivatel poslal
+    await Gallery.updateOne(
+        {name: req.params.gallery }, {
+            preview: image._id
+        }
+    )
+    res.send(image);
+
 });
 
 router.delete("/:gallery/:id", async (req, res) => {

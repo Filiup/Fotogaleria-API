@@ -36,6 +36,9 @@ const imageSchema = new mongoose.Schema({
 
 
 const Gallery = mongoose.model("Gallery", new mongoose.Schema({
+    preview: {
+        type: mongoose.Schema.Types.ObjectId,
+    },
     name: {
         type: String,
         minlength: 3,
