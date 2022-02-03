@@ -1,6 +1,7 @@
 const express = require("express");
 const galeries = require("../routes/galleries");
 const images = require("../routes/images");
+const frontend = require("../routes/frontend")
 const helmet = require("helmet");
 const morgan = require("morgan");
 const winston = require("winston");
@@ -19,6 +20,7 @@ module.exports = (app) => {
   }
 
   app.use(cors);
+  app.use("/", frontend);
   app.use("/api/galleries/images", images);
   app.use("/api/galleries", galeries);
 
