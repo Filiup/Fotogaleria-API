@@ -12,7 +12,12 @@ const cors = require("../middleware/cors");
 
 module.exports = (app) => {
   app.use(express.json());
-  app.use(helmet());
+  app.use("/", frontend);
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+  )
 
   if (app.get("env") === "development") {
     app.use(morgan("tiny"));
@@ -20,7 +25,6 @@ module.exports = (app) => {
   }
 
   app.use(cors);
-  app.use("/", frontend);
   app.use("/api/galleries/images", images);
   app.use("/api/galleries", galeries);
 
