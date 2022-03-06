@@ -19,3 +19,7 @@ Pri každej ***galérii*** sa následne vytvára aj ***náhľadový obrázok***.
 > SQL databázy ukladajú všetky **dáta** do **tabuliek** ( riadky a stĺpce ). Na komunikáciu s databázou sa používa 
 > jazyk **SQL**. Sú to **relačné databázy** ( vznikajú vsťahy medzi jednotlivými tabuľkami ).
 
+``` js
+console.log("hi");
+```
+
