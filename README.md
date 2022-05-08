@@ -6,7 +6,7 @@
 
 Po zapnutí bude API bežať na porte **3000**  
 Mongo-express ( webové GUI pre MongoDB ) bude bežať na porte **8080**      
-**Aplikácia sa nedá spustiť v Node verzii 17**
+**Aplikácia sa nedá spustiť v Node verzii 17+**
 
 # Niečo o projekte
 **REST API** slúžiace na ***vytváranie*** galérií. Do galérií je následne možné ***ukladať*** obrázky.
