@@ -5,7 +5,8 @@
 3. Vypnutie aplikácie: ``` docker compose -f api-docker-compose.yaml down ```
 
 Po zapnutí bude API bežať na porte **3000**  
-Mongo-express ( webové GUI pre MongoDB ) bude bežať na porte **8080**
+Mongo-express ( webové GUI pre MongoDB ) bude bežať na porte **8080**  
+**Aplikácia sa nedá spustiť v Node verzii 17**
 
 # Niečo o projekte
 **REST API** slúžiace na ***vytváranie*** galérií. Do galérií je následne možné ***ukladať*** obrázky.
